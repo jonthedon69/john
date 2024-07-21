@@ -1,0 +1,60 @@
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+-- TABLE CREATION
+CREATE TABLE CUSTOMERS (
+    CID CHAR(4),
+    CNAME VARCHAR(10),
+    AGE NUMBER(3),
+    ADDRESS VARCHAR(10),
+    SALARY NUMBER(5),
+    CONSTRAINT PK_CUST PRIMARY KEY(CID)
+);
+
+-- ARCHIVAL TABLE CREATION
+CREATE TABLE CUSTOMERS_ARCHIVE (
+    CID CHAR(4),
+    CNAME VARCHAR(10),
+    AGE NUMBER(3),
+    ADDRESS VARCHAR(10),
+    SALARY NUMBER(5),
+    SALARY_DIFFERENCE NUMBER(5),
+    DELETED_DATE DATE
+);
+
+-- TRIGGER CREATION
+CREATE OR REPLACE TRIGGER CUSTOMERS_UID
+BEFORE INSERT OR UPDATE OR DELETE ON CUSTOMERS
+FOR EACH ROW
+DECLARE
+    v_old_salary CUSTOMERS.SALARY%TYPE;
+    v_new_salary CUSTOMERS.SALARY%TYPE;
+BEGIN
+    IF INSERTING THEN
+        IF :NEW.SALARY < 0 THEN
+            -- Salary must be positive
+            DBMS_OUTPUT.PUT_LINE('Trigger CUSTOMERS_INSERT executed');    
+            RAISE_APPLICATION_ERROR(-20001, 'Salary must be positive');
+        END IF;
+    ELSIF DELETING THEN
+        -- Archive the old record before deletion
+        DBMS_OUTPUT.PUT_LINE('Trigger CUSTOMERS_DELETE executed');
+        INSERT INTO CUSTOMERS_ARCHIVE (
+            CID, CNAME, AGE, ADDRESS, SALARY, SALARY_DIFFERENCE, DELETED_DATE
+        ) VALUES (
+            :OLD.CID, :OLD.CNAME, :OLD.AGE, :OLD.ADDRESS, :OLD.SALARY,
+            NULL, SYSDATE
+        );
+    ELSIF UPDATING THEN
+        -- For UPDATE operation, display old and new salaries
+        v_old_salary := :OLD.SALARY;
+        v_new_salary := :NEW.SALARY;
+        DBMS_OUTPUT.PUT_LINE('Old Salary: ' || v_old_salary);
+        DBMS_OUTPUT.PUT_LINE('New Salary: ' || v_new_salary);
+        -- Display salary difference
+        IF v_old_salary IS NOT NULL AND v_new_salary IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('Salary Difference: ' || (v_new_salary - v_old_salary));
+        END IF;
+    END IF;
+END;
+/

@@ -1,0 +1,47 @@
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+-- Create the EMPLOYEE table
+CREATE TABLE EMPLOYEE (
+    E_ID CHAR(4),
+    E_NAME VARCHAR(20),
+    AGE NUMBER(3),
+    SALARY NUMBER(20),
+    CONSTRAINT PK_EMPLOYEE PRIMARY KEY (E_ID)
+);
+
+-- Insert records into the EMPLOYEE table
+INSERT INTO EMPLOYEE VALUES ('e1', 'ram', 20, 50000);
+INSERT INTO EMPLOYEE VALUES ('e2', 'ramya', 25, 50000);
+INSERT INTO EMPLOYEE VALUES ('e3', 'rama', 30, 90000);
+INSERT INTO EMPLOYEE VALUES ('e4', 'john', 20, 50000);
+
+-- Declare cursor and fetch values
+DECLARE
+    v_e_id EMPLOYEE.E_ID%TYPE;
+    v_e_name EMPLOYEE.E_NAME%TYPE;
+    v_age EMPLOYEE.AGE%TYPE;
+    v_salary EMPLOYEE.SALARY%TYPE;
+    CURSOR emp_cursor IS
+        SELECT E_ID, E_NAME, AGE, SALARY
+        FROM EMPLOYEE;
+BEGIN
+    OPEN emp_cursor;
+    LOOP
+        FETCH emp_cursor INTO v_e_id, v_e_name, v_age, v_salary;
+        EXIT WHEN emp_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Employee ID: ' || v_e_id);
+        DBMS_OUTPUT.PUT_LINE('Name: ' || v_e_name);
+        DBMS_OUTPUT.PUT_LINE('Age: ' || v_age);
+        DBMS_OUTPUT.PUT_LINE('Salary: ' || v_salary);
+        DBMS_OUTPUT.PUT_LINE('--------------------------------');
+    END LOOP;
+    CLOSE emp_cursor;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+        IF emp_cursor%ISOPEN THEN
+            CLOSE emp_cursor;
+        END IF;
+END;
+/

@@ -1,0 +1,40 @@
+<!-- index.html --> 
+ 
+<!DOCTYPE html> 
+<head> 
+    <title>Fruit Data Sender</title> 
+</head> 
+<body> 
+    <h1>Fruit Data Sender</h1> 
+    <label for="fruitName">Fruit Name:</label> 
+    <input type="text" id="fruitName" name="fruitName"><br><br> 
+    <label for="fruitPrice">Fruit Price:</label> 
+    <input type="text" id="fruitPrice" name="fruitPrice"><br><br> 
+    <button onclick="sendData()">Send Data</button> 
+ 
+    <script> 
+        function sendData() { 
+            const name = document.getElementById('fruitName').value; 
+            const price = document.getElementById('fruitPrice').value; 
+ 
+            const data = { 
+                name: name, 
+                price: price 
+            }; 
+ 
+            // Using Ajax to send data to server 
+            const xhr = new XMLHttpRequest(); 
+            xhr.open('POST', '/fruitData', true); 
+            xhr.setRequestHeader('Content-Type', 'application/json'); 
+            xhr.send(JSON.stringify(data)); 
+ 
+            xhr.onreadystatechange = function () { 
+                if (xhr.readyState === 4 && xhr.status === 200) { 
+                    console.log('Data sent successfully'); 
+                    // You can handle the success response here 
+                } 
+            }; 
+        } 
+    </script> 
+</body> 
+</html> 

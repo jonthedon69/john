@@ -1,0 +1,62 @@
+-- Enable server output
+SET SERVEROUTPUT ON;
+
+-- TABLE CREATION: N_ROLLCALL
+CREATE TABLE N_ROLLCALL (
+    E_ID CHAR(4),
+    E_NAME VARCHAR(20),
+    AGE NUMBER(3),
+    SALARY NUMBER(20),
+    CONSTRAINT PK_ROLLCALL PRIMARY KEY (E_ID)
+);
+
+-- POPULATING VALUES INTO N_ROLLCALL
+INSERT INTO N_ROLLCALL VALUES ('e1', 'ram', 20, 50000);
+INSERT INTO N_ROLLCALL VALUES ('e2', 'ramya', 25, 50000);
+INSERT INTO N_ROLLCALL VALUES ('e3', 'rama', 30, 90000);
+INSERT INTO N_ROLLCALL VALUES ('e4', 'john', 20, 50000);
+
+-- TABLE CREATION: O_ROLLCALL
+CREATE TABLE O_ROLLCALL (
+    E_ID CHAR(4),
+    E_NAME VARCHAR(20),
+    AGE NUMBER(3),
+    SALARY NUMBER(20),
+    CONSTRAINT PK_RC PRIMARY KEY (E_ID)
+);
+
+-- POPULATING VALUES INTO O_ROLLCALL
+INSERT INTO O_ROLLCALL VALUES ('e11', 'ram', 20, 50000);
+INSERT INTO O_ROLLCALL VALUES ('e2', 'ramya', 25, 50000);
+INSERT INTO O_ROLLCALL VALUES ('e3', 'rama', 30, 90000);
+INSERT INTO O_ROLLCALL VALUES ('e14', 'john', 20, 50000);
+
+-- DECLARING CURSOR AND MERGING DATA
+DECLARE
+    CURSOR c_new_rollcall IS
+        SELECT * FROM N_ROLLCALL;
+    v_exists NUMBER;
+BEGIN
+    FOR n_rec IN c_new_rollcall LOOP
+        SELECT COUNT(*) INTO v_exists
+        FROM O_ROLLCALL
+        WHERE E_ID = n_rec.E_ID;
+
+        IF v_exists = 0 THEN
+            -- If record does not exist, insert into O_ROLLCALL
+            INSERT INTO O_ROLLCALL (E_ID, E_NAME, AGE, SALARY)
+            VALUES (n_rec.E_ID, n_rec.E_NAME, n_rec.AGE, n_rec.SALARY);
+        ELSE
+            -- Record already exists, so skip
+            DBMS_OUTPUT.PUT_LINE('Record with E_ID ' || n_rec.E_ID || ' already exists. Skipping.');
+        END IF;
+    END LOOP;
+
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Merge process completed.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
