@@ -1,0 +1,64 @@
+mongosh 
+
+use usermanaged 
+db.transactions.drop() 
+
+#create a transactions.json
+
+[
+    {
+        "transaction_id": 1,
+        "user_id": 1001,
+        "amount":50.25,
+        "timestamp":"2024-04T08:30:00Z",
+        "description":"Purchase of groceries"
+    },
+    {
+        "transaction_id": 2,
+        "user_id": 1002,
+        "amount":20.75,
+        "timestamp":"2024-05T08:40:00Z",
+        "description":"Purchase of utilities"
+    },
+    {
+        "transaction_id": 3,
+        "user_id": 1003,
+        "amount":100.0,
+        "timestamp":"2024-04T12:30:00Z",
+        "description":"Salary deposit"
+    }
+]
+
+mongoimport.exe --collection=transactions --db=usermanaged --type=json --jsonArray 
+transactions.json 
+
+usermanaged> db.transactions.find() 
+
+#create a transactions_upsert.json 
+
+[
+    {
+        "transaction_id": 1,
+        "user_id": 1001,
+        "amount":50.25,
+        "timestamp":"2024-04T08:30:00Z",
+        "description":"fwefrfqef"
+    },
+    {
+        "transaction_id": 2,
+        "user_id": 1002,
+        "amount":20.75,
+        "timestamp":"2024-05T08:40:00Z",
+        "description":"rkkkkkfrekfekkkkkkk"
+    },
+    {
+        "transaction_id": 3,
+        "user_id": 1003,
+        "amount":100.0,
+        "timestamp":"2024-04T12:30:00Z",
+        "description":"oooooooooooooooooooooo"
+    }
+]
+
+mongoimport --db usermanaged --collection transactions --file transactions_upsert.json -
+jsonArray --upsertFields transaction_id 
